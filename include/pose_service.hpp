@@ -15,12 +15,9 @@ class PoseService : public rclcpp::Node {
   PoseService();
 
  private:
-  int N_;
-  bool computing_avg_;
   rclcpp::Service<calibration_srv::srv::Calibration>::SharedPtr srv_;
   Eigen::Vector3d mean_tvec_;
   Eigen::Quaterniond mean_quat_;
-  std::string input_topic_name_;
   bool mean_computed_;
   std::shared_ptr<ImageProcessor> image_processor_node_;
   rclcpp::executors::SingleThreadedExecutor node_executor_;

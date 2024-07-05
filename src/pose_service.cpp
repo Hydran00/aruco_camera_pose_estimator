@@ -4,18 +4,12 @@ using std::chrono::milliseconds;
 
 PoseService::PoseService()
     : Node("pose_service"),
-      computing_avg_(false),
       mean_tvec_(Eigen::Vector3d::Zero()),
       mean_quat_(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0)) {
   this->declare_parameter("input_topic_name", "/camera/camera/color/image_raw");
-  input_topic_name_ = this->get_parameter("input_topic_name").as_string();
-
   this->declare_parameter("output_service_name",
                           "/calibration/get_camera_pose");
-
   this->declare_parameter("n_observation", 10);
-  N_ = this->get_parameter("n_observation").as_int();
-
   this->declare_parameter("timeout_ms", 2000);
   timeout_ = (u_int32_t)this->get_parameter("timeout_ms").as_int();
 
@@ -49,7 +43,9 @@ PoseService::PoseService()
   mean_computed_ = false;
 
   image_processor_node_ = std::make_shared<ImageProcessor>(
-      input_topic_name_, N_, mean_tvec_, mean_quat_, mean_computed_,
+      this->get_parameter("input_topic_name").as_string(),
+      this->get_parameter("n_observation").as_int(),
+      mean_tvec_, mean_quat_, mean_computed_,
       this->get_parameter("show_img").as_bool(),
       this->get_parameter("aruco_marker_id").as_int(),
       this->get_parameter("aruco_size").as_double(),
@@ -63,12 +59,14 @@ PoseService::PoseService()
   // print each parameter
   RCLCPP_INFO(this->get_logger(),
               "Parameters: input_topic_name: %s, output_service_name: %s, "
-              "n_observation: %d, "
-              "timeout_ms: %d, show_img: %d, aruco_marker_id: %ld, "
+              "n_observation: %ld, "
+              "timeout_ms: %ld, show_img: %d, aruco_marker_id: %ld, "
               "aruco_size: %f, cx: %f, cy: %f, fx: %f, fy: %f",
-              input_topic_name_.c_str(),
+              this->get_parameter("input_topic_name").as_string().c_str(),
               this->get_parameter("output_service_name").as_string().c_str(),
-              N_, timeout_, this->get_parameter("show_img").as_bool(),
+              this->get_parameter("n_observation").as_int(),
+              this->get_parameter("timeout_ms").as_int(),
+              this->get_parameter("show_img").as_bool(),
               this->get_parameter("aruco_marker_id").as_int(),
               this->get_parameter("aruco_size").as_double(),
               this->get_parameter("cx").as_double(),
@@ -144,7 +142,7 @@ void PoseService::get_camera_pose_service_callback(
   // subscribe to the camera topic
   image_processor_node_->sub_ =
       image_processor_node_->create_subscription<sensor_msgs::msg::Image>(
-          input_topic_name_, 1,
+          this->get_parameter("input_topic_name").as_string(), 1,
           std::bind(&ImageProcessor::image_callback, image_processor_node_,
                     std::placeholders::_1));
 
@@ -157,13 +155,14 @@ void PoseService::get_camera_pose_service_callback(
   if (!mean_computed_) {
     if (image_processor_node_->idx_ == 0) {
       RCLCPP_ERROR(this->get_logger(),
-                   "No Aruco found, possible reasons: topic name wrong or "
-                   "Aruco not in the field of view!");
+                   "No Aruco found, possible reasons: topic name wrong, "
+                   "Aruco id wrong or Aruco not in the field of view!");
     } else {
       RCLCPP_ERROR(this->get_logger(),
-                   "Timeout reached before collecting %d observations: just %d "
+                   "Timeout reached before collecting %ld observations: just %d "
                    "measurements collected, try improving the timeout time!",
-                   N_, image_processor_node_->idx_);
+                   this->get_parameter("n_observation").as_int(),
+                   image_processor_node_->idx_);
     }
     response->camera_pose.header.frame_id = "error";
     return;

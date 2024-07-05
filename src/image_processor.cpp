@@ -66,19 +66,10 @@ bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
           cv::imshow("Aruco Marker", frame);
           cv::waitKey(1);
         }
+      return true;
       }
     }
-    // Clear vectors
-    ids.clear();
-    corners.clear();
-    // Release gray image memory
-    gray.release();
-
-    return true;
   }
-  // Release gray image memory if no markers detected
-  gray.release();
-
   return false;
 }
 
