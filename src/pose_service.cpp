@@ -139,7 +139,6 @@ void PoseService::get_camera_pose_service_callback(
   // Unsubscribe if already subscribed
   if (image_processor_node_->sub_) {
     image_processor_node_->sub_.reset();
-    RCLCPP_INFO(this->get_logger(), "Previous subscription reset.");
   }
 
   // subscribe to the camera topic

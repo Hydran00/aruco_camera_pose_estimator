@@ -52,15 +52,13 @@ bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
   if (!ids.empty()) {
     for (size_t i = 0; i < ids.size(); ++i) {
       if (ids[i] == aruco_marker_id_) {
-        RCLCPP_INFO(this->get_logger(), "Detected Aruco base marker");
+        // RCLCPP_INFO(this->get_logger(), "Detected Aruco base marker");
         std::vector<cv::Vec3d> rvec, tvec;
         cv::aruco::estimatePoseSingleMarkers(corners, arucobase_size_,
                                              intrinsic_camera_,
                                              distortion_camera_, rvec, tvec);
         tvec_camera = tvec[0];
         rvec_camera = rvec[0];
-        RCLCPP_INFO(this->get_logger(), "tvec: %f %f %f", tvec[0][0],
-                    tvec[0][1], tvec[0][2], rvec[0][0], rvec[0][1], rvec[0][2]);
         // Draw axis for the aruco marker
         if (show_img_) {
           cv::aruco::drawAxis(frame, intrinsic_camera_, distortion_camera_,
@@ -107,9 +105,6 @@ void ImageProcessor::image_callback(
     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
     return;
   }
-  // print image resolution
-  RCLCPP_INFO(this->get_logger(), "Image resolution: %d x %d",
-              cv_ptr->image.cols, cv_ptr->image.rows);
   cv::Vec3d tvec_camera, rvec_camera;
   bool success =
       camera_pose_estimation(cv_ptr->image, tvec_camera, rvec_camera);
@@ -128,8 +123,6 @@ void ImageProcessor::image_callback(
     for (const auto &tvec : tvec_cam_list_) {
       mean_tvec += Eigen::Vector3d(tvec[0], tvec[1], tvec[2]);
     }
-    RCLCPP_INFO(this->get_logger(), "Size of tvec list is %d",
-                static_cast<int>(tvec_cam_list_.size()));
     mean_tvec /= tvec_cam_list_.size();
     mean_tvec_ = mean_tvec;
     std::vector<Eigen::Quaterniond> quat_list(tvec_cam_list_.size());
