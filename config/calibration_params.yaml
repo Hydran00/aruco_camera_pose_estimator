@@ -1,0 +1,7 @@
+pose_service:
+  ros__parameters:
+    # rs435 parameters
+    cx: 958.620910644531
+    cy: 564.277893066406
+    fx: 1376.80395507812
+    fy: 1376.80322265625

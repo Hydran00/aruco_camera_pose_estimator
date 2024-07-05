@@ -1,0 +1,20 @@
+pose_service:
+  ros__parameters:
+    
+    input_topic_name: "/camera/camera/color/image_raw"
+    output_service_name: "/calibration/get_camera_pose"
+    n_observation: 10 # number of measurements for computing the average
+    timeout_ms: 2000
+    show_img: false
+    aruco_marker_id: 15
+    aruco_size: 0.10 # in meters
+    aruco_XYZ_offset_from_baseframe: # in meters
+      - 0.0160
+      - -0.045
+      - -0.10
+    aruco_rot_offset_from_baseframe: # in quaternion form (w, x, y, z)
+      - 0.0
+      - 0.0
+      - 0.7071067811865475
+      - 0.7071067811865475
+
