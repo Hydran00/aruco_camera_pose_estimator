@@ -1,7 +1,13 @@
 pose_service:
   ros__parameters:
-    # rs435 parameters
+    # rs435 intrinsic parameters
     cx: 958.620910644531
     cy: 564.277893066406
     fx: 1376.80395507812
     fy: 1376.80322265625
+    # rs435 distortion parameter
+    k1: 0.0
+    k2: 0.0
+    k3: 0.0
+    p1: 0.0
+    p2: 0.0

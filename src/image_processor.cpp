@@ -10,12 +10,11 @@
 
 using namespace std::chrono_literals;
 
-ImageProcessor::ImageProcessor(const std::string &topic_name, const uint32_t N,
-                               Eigen::Vector3d &mean_tvec,
-                               Eigen::Quaterniond &mean_quat,
-                               bool &mean_computed, bool show_img,
-                               uint16_t aruco_marker_id, double arucobase_size,
-                               double cx, double cy, double fx, double fy)
+ImageProcessor::ImageProcessor(
+    const std::string &topic_name, const uint32_t N, Eigen::Vector3d &mean_tvec,
+    Eigen::Quaterniond &mean_quat, bool &mean_computed, bool show_img,
+    uint16_t aruco_marker_id, double arucobase_size, double cx, double cy,
+    double fx, double fy, double k1, double k2, double k3, double p1, double p2)
     : Node("image_processor"),
       topic_name_(topic_name),
       N_(N),
@@ -28,14 +27,19 @@ ImageProcessor::ImageProcessor(const std::string &topic_name, const uint32_t N,
       cx_(cx),
       cy_(cy),
       fx_(fx),
-      fy_(fy) {
+      fy_(fy),
+      k1_(k1),
+      k2_(k2),
+      k3_(k3),
+      p1_(p1),
+      p2_(p2) {
   idx_ = 0;
   dictionary_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
   detector_params_ = cv::aruco::DetectorParameters::create();
   tvec_cam_list_.resize(N_, cv::Vec3d(0, 0, 0));
   rvec_cam_list_.resize(N_, cv::Vec3d(0, 0, 0));
 
-  distortion_camera_ = (cv::Mat_<double>(1, 5) << 0, 0, 0, 0, 0);
+  distortion_camera_ = (cv::Mat_<double>(1, 5) << k1_, k2_, p1_, p2_, k3_);
   intrinsic_camera_ =
       (cv::Mat_<double>(3, 3) << fx_, 0, cx_, 0, fy_, cy_, 0, 0, 1);
 }
@@ -66,7 +70,7 @@ bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
           cv::imshow("Aruco Marker", frame);
           cv::waitKey(1);
         }
-      return true;
+        return true;
       }
     }
   }

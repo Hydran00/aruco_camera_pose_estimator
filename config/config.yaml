@@ -16,3 +16,15 @@ pose_service:
       - 0.0
       - 0.7071067811865475
       - 0.7071067811865475
+
+# if you just need the pose of the camera, with respect to the aruco marker
+# use this insted:
+#   aruco_XYZ_offset_from_baseframe: # in meters
+#     - 0.0
+#     - 0.0
+#     - 0.0
+#   aruco_rot_offset_from_baseframe: # in quaternion form (w, x, y, z)
+#     - 1.0
+#     - 0.0
+#     - 0.0
+#     - 0.0

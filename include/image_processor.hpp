@@ -16,7 +16,8 @@ class ImageProcessor : public rclcpp::Node {
                  Eigen::Vector3d &mean_tvec, Eigen::Quaterniond &mean_quat,
                  bool &mean_computed, bool show_img, uint16_t aruco_marker_id,
                  double arucobase_size, double cx, double cy, double fx,
-                 double fy);
+                 double fy, double k1, double k2, double k3, double p1,
+                 double p2);
   std::string topic_name_;
   uint32_t N_;
   Eigen::Vector3d &mean_tvec_;
@@ -36,8 +37,9 @@ class ImageProcessor : public rclcpp::Node {
   uint16_t aruco_marker_id_;
   double arucobase_size_;
   double cx_, cy_, fx_, fy_;
-  cv::Mat intrinsic_camera_ = cv::Mat_<double>(3, 3);  // << fx, 0, cx, 0, fy, cy, 0, 0, 1);
-  cv::Mat distortion_camera_ = cv::Mat_<double>(1, 5); // << 0, 0, 0, 0, 0);
+  double k1_, k2_, k3_, p1_, p2_;
+  cv::Mat intrinsic_camera_ = cv::Mat_<double>(3, 3);
+  cv::Mat distortion_camera_ = cv::Mat_<double>(1, 5);
 
   bool camera_pose_estimation(cv::Mat &frame, cv::Vec3d &tvec_camera,
                               cv::Vec3d &rvec_camera);
