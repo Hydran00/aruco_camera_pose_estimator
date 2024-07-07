@@ -45,13 +45,13 @@ camera intrinsic:
   - `fx`
   - `fy`    
 These parameters are the one in the calibration matrix
-$$
+```math
 \begin{pmatrix}
   fx & 0 & cx \\
   0 & fy & cy \\
   0 & 0 & 1 \\
 \end{pmatrix}
-$$
+```
 distortion coefficients:
   - `k1`
   - `k2`
