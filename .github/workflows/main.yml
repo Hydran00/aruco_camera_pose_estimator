@@ -1,0 +1,24 @@
+name: Humble CI
+
+on:
+  push:
+    branches:
+      - master
+          
+jobs:
+  humble_source:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+      # OpenCV
+      - run: sudo apt install -y libgtk2.0-dev pkg-config libopencv-dev -y
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: calibration_srv
+          target-ros2-distro: humble
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: aruco_camera_pose_estimator
+          target-ros2-distro: humble
