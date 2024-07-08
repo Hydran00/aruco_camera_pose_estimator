@@ -1,0 +1,3 @@
+std_msgs/String req
+---
+geometry_msgs/PoseStamped camera_pose

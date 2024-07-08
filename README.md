@@ -1,18 +1,25 @@
 # aruco_camera_pose_estimator
-This repo contains a ROS2 package that estimates the camera pose with respect to the world frame exploiting Aruco Markers. This package implements a [ROS2 Service](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html) that collects a set of $N$ measurements of the aruco position and orientation and computes the average. Then the resulting camera position and orientation is sent as the service response to the calling node. Each required parameter is loaded from a `.yaml` file.
+This repo contains a ROS2 metapackage that estimates the camera pose with respect to the world frame exploiting Aruco Markers. This package implements a [ROS2 Service](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html) that collects a set of $N$ measurements of the aruco position and orientation and computes the average. Then the resulting camera position and orientation is sent as the service response to the calling node. Each required parameter is loaded from a `.yaml` file.
 
 # Installation
+The following code will build the `calibration_srv` interface and the c++ package of the program:
 ```
 cd <path/to/your/ros2/workspace>/src
 git clone https://github.com/Hydran00/aruco_camera_pose_estimator.git
 cd .. 
-colcon build --symlink-install --packages-select aruco_camera_pose_estimator
+colcon build --symlink-install
 ```
 Then print your aruco using the 4x4 dictionary. You can use this [website](https://chev.me/arucogen/).
 
-# Run the service
+# Run the service server
+In a sourced terminal run
 ```
 ros2 launch aruco_camera_pose_estimator aruco_camera_pose_estimator.launch.py
+```
+In another sourced terminal call the service
+```
+ros2 service call /calibration/get_camera_pose calibration_srv/srv/Calibration "req:
+  data: ''"
 ```
 ### Maths behind this implementation
 The OpenCV Aruco Library let us compute $M_{c}^{a} \in \mathcal{R}^{4x4}$ that express the rototranslation of the Aruco with respect to the camera frame. 
