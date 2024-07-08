@@ -1,4 +1,6 @@
 # aruco_camera_pose_estimator
+![Build Humble](https://github.com/Hydran00/aruco_camera_pose_estimator/actions/workflows/main.yml/badge.svg)  
+
 This repo contains a ROS2 metapackage that estimates the camera pose with respect to the world frame exploiting Aruco Markers. This package implements a [ROS2 Service](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html) that collects a set of $N$ measurements of the aruco position and orientation and computes the average. Then the resulting camera position and orientation is sent as the service response to the calling node. Each required parameter is loaded from a `.yaml` file.
 
 # Installation
