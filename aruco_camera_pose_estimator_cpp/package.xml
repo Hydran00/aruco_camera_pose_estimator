@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>aruco_camera_pose_estimator</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <name>aruco_camera_pose_estimator_cpp</name>
+  <version>0.0.1</version>
+  <description>ROS2 package for estimating the position and orientation of the camera using Aruco
+    markers</description>
   <maintainer email="ndavide.dn@gmail.com">hydran00</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>ament_cmake_python</buildtool_depend>
-  <exec_depend>calibration_srv</exec_depend>
-  <depend>tf2_ros</depend>
+  <depend>cv_bridge</depend>
+  <depend>calibration_srv</depend>
   <depend>rclcpp</depend>
   <export>
     <build_type>ament_cmake</build_type>

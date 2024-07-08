@@ -4,6 +4,17 @@
 This repo contains a ROS2 metapackage that estimates the camera pose with respect to the world frame exploiting Aruco Markers. This package implements a [ROS2 Service](https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html) that collects a set of $N$ measurements of the aruco position and orientation and computes the average. Then the resulting camera position and orientation is sent as the service response to the calling node. Each required parameter is loaded from a `.yaml` file.
 
 # Installation
+Install dependecies:
+- [ROS2](https://docs.ros.org/en/humble/Installation.html)
+- OpenCV
+  ```
+  sudo apt install libopencv-dev -y
+  ```
+- ROS CVBridge
+  ```
+  sudo apt-get install ros-$ROS_DISTRO-cv-bridge
+  ```
+
 The following code will build the `calibration_srv` interface and the c++ package of the program:
 ```
 cd <path/to/your/ros2/workspace>/src
@@ -16,7 +27,7 @@ Then print your aruco using the 4x4 dictionary. You can use this [website](https
 # Run the service server
 In a sourced terminal run
 ```
-ros2 launch aruco_camera_pose_estimator aruco_camera_pose_estimator.launch.py
+ros2 launch aruco_camera_pose_estimator_cpp aruco_camera_pose_estimator.launch.py
 ```
 In another sourced terminal call the service
 ```
