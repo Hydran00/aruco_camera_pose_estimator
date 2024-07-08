@@ -20,5 +20,5 @@ jobs:
           target-ros2-distro: humble
       - uses: ros-tooling/action-ros-ci@v0.3
         with:
-          package-name: aruco_camera_pose_estimator
+          package-name: aruco_camera_pose_estimator_cpp
           target-ros2-distro: humble
