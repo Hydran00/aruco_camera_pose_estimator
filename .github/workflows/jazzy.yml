@@ -16,6 +16,7 @@ jobs:
       - run: sudo apt install libopencv-dev -y
       # CVBridge
       - run: sudo apt install ros-jazzy-cv-bridge -y
+      - run: source /opt/ros/jazzy/setup.bash
       - uses: ros-tooling/action-ros-ci@v0.3
         with:
           package-name: calibration_srv
