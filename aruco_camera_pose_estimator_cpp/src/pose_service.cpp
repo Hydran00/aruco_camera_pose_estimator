@@ -39,6 +39,12 @@ PoseService::PoseService()
   this->declare_parameter("cy", 564.277893066406);
   this->declare_parameter("fx", 1376.80395507812);
   this->declare_parameter("fy", 1376.80322265625);
+  // camera distortion
+  this->declare_parameter("k1", 0.0);
+  this->declare_parameter("k2", 0.0);
+  this->declare_parameter("k3", 0.0);
+  this->declare_parameter("p1", 0.0);
+  this->declare_parameter("p2", 0.0);
 
   mean_computed_ = false;
 
@@ -52,7 +58,12 @@ PoseService::PoseService()
       this->get_parameter("cx").as_double(),
       this->get_parameter("cy").as_double(),
       this->get_parameter("fx").as_double(),
-      this->get_parameter("fy").as_double());
+      this->get_parameter("fy").as_double(),
+      this->get_parameter("k1").as_double(),
+      this->get_parameter("k2").as_double(),
+      this->get_parameter("k3").as_double(),
+      this->get_parameter("p1").as_double(),
+      this->get_parameter("p2").as_double());
 
   node_executor_.add_node(image_processor_node_);
 
@@ -61,7 +72,8 @@ PoseService::PoseService()
               "Parameters: input_topic_name: %s, output_service_name: %s, "
               "n_observation: %ld, "
               "timeout_ms: %ld, show_img: %d, aruco_marker_id: %ld, "
-              "aruco_size: %f, cx: %f, cy: %f, fx: %f, fy: %f",
+              "aruco_size: %f, cx: %f, cy: %f, fx: %f, fy: %f, "
+              "k1: %f, k2: %f, k3: %f, p1: %f, p2: %f",
               this->get_parameter("input_topic_name").as_string().c_str(),
               this->get_parameter("output_service_name").as_string().c_str(),
               this->get_parameter("n_observation").as_int(),
@@ -72,7 +84,12 @@ PoseService::PoseService()
               this->get_parameter("cx").as_double(),
               this->get_parameter("cy").as_double(),
               this->get_parameter("fx").as_double(),
-              this->get_parameter("fy").as_double());
+              this->get_parameter("fy").as_double(),
+              this->get_parameter("k1").as_double(),
+              this->get_parameter("k2").as_double(),
+              this->get_parameter("k3").as_double(),
+              this->get_parameter("p1").as_double(),
+              this->get_parameter("p2").as_double());
   RCLCPP_INFO(this->get_logger(), "aruco_XYZ_offset_from_baseframe: %f %f %f",
               aruco_XYZ_offset_from_baseframe_[0],
               aruco_XYZ_offset_from_baseframe_[1],

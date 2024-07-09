@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(aruco_camera_pose_estimator)
+project(aruco_camera_pose_estimator_cpp)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -14,17 +14,17 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package( OpenCV REQUIRED )
-find_package( Eigen3 REQUIRED )
+find_package(OpenCV REQUIRED )
+find_package(Eigen3 REQUIRED )
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(calibration_srv REQUIRED)
 
-add_executable(aruco_camera_pose_estimator
+add_executable(aruco_camera_pose_estimator_cpp
   src/pose_service.cpp
   src/image_processor.cpp
 )
-ament_target_dependencies(aruco_camera_pose_estimator
+ament_target_dependencies(aruco_camera_pose_estimator_cpp
   rclcpp
     sensor_msgs
     geometry_msgs
@@ -35,16 +35,16 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   include
 )
-target_link_libraries(aruco_camera_pose_estimator
+target_link_libraries(aruco_camera_pose_estimator_cpp
   Eigen3::Eigen
   ${OpenCV_LIBS}
 )
 install(TARGETS
-  aruco_camera_pose_estimator
+  aruco_camera_pose_estimator_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
 install(
-  DIRECTORY config
+  DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
 
