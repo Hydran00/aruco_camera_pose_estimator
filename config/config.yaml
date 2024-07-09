@@ -5,11 +5,11 @@ pose_service:
     aruco_marker_id: 9
     n_observation: 10 # number of measurements for computing the average
     timeout_ms: 2000
-    show_img: true
+    show_img: false
     aruco_size: 0.10 # in meters
     aruco_XYZ_offset_from_baseframe: # in meters
-      - 0.0160
-      - -0.045
+      - -0.016
+      - 0.045
       - -0.10
     aruco_rot_offset_from_baseframe: # in quaternion form (w, x, y, z)
       - 0.0
