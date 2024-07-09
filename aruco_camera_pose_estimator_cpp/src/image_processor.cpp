@@ -13,7 +13,7 @@ using namespace std::chrono_literals;
 ImageProcessor::ImageProcessor(
     const std::string &topic_name, const uint32_t N, Eigen::Vector3d &mean_tvec,
     Eigen::Quaterniond &mean_quat, bool &mean_computed, bool show_img,
-    uint16_t aruco_marker_id, double arucobase_size, double cx, double cy,
+    double arucobase_size, double cx, double cy,
     double fx, double fy, double k1, double k2, double k3, double p1, double p2)
     : Node("image_processor"),
       topic_name_(topic_name),
@@ -22,7 +22,6 @@ ImageProcessor::ImageProcessor(
       mean_quat_(mean_quat),
       mean_computed_(mean_computed),
       show_img_(show_img),
-      aruco_marker_id_(aruco_marker_id),
       arucobase_size_(arucobase_size),
       cx_(cx),
       cy_(cy),
@@ -32,7 +31,9 @@ ImageProcessor::ImageProcessor(
       k2_(k2),
       k3_(k3),
       p1_(p1),
-      p2_(p2) {
+      p2_(p2)
+{
+  aruco_marker_id_ = 0;
   idx_ = 0;
   dictionary_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
   detector_params_ = cv::aruco::DetectorParameters::create();
@@ -46,16 +47,21 @@ ImageProcessor::ImageProcessor(
 
 bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
                                             cv::Vec3d &tvec_camera,
-                                            cv::Vec3d &rvec_camera) {
+                                            cv::Vec3d &rvec_camera)
+{
   cv::Mat gray;
   cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
   std::vector<int> ids;
   std::vector<std::vector<cv::Point2f>> corners;
   cv::aruco::detectMarkers(gray, dictionary_, corners, ids, detector_params_);
 
-  if (!ids.empty()) {
-    for (size_t i = 0; i < ids.size(); ++i) {
-      if (ids[i] == aruco_marker_id_) {
+  // RCLCPP_INFO(this->get_logger(), "Looking for aruco with id %d", aruco_marker_id_);
+  if (!ids.empty())
+  {
+    for (size_t i = 0; i < ids.size(); ++i)
+    {
+      if (ids[i] == aruco_marker_id_)
+      {
         // RCLCPP_INFO(this->get_logger(), "Detected Aruco base marker");
         std::vector<cv::Vec3d> rvec, tvec;
         cv::aruco::estimatePoseSingleMarkers(corners, arucobase_size_,
@@ -64,7 +70,8 @@ bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
         tvec_camera = tvec[0];
         rvec_camera = rvec[0];
         // Draw axis for the aruco marker
-        if (show_img_) {
+        if (show_img_)
+        {
           cv::aruco::drawAxis(frame, intrinsic_camera_, distortion_camera_,
                               rvec[0], tvec[0], 0.1);
           cv::imshow("Aruco Marker", frame);
@@ -78,9 +85,11 @@ bool ImageProcessor::camera_pose_estimation(cv::Mat &frame,
 }
 
 Eigen::Quaterniond ImageProcessor::quaternion_avg(
-    const std::vector<Eigen::Quaterniond> &quat_list) {
+    const std::vector<Eigen::Quaterniond> &quat_list)
+{
   Eigen::Matrix4d M = Eigen::Matrix4d::Zero();
-  for (const auto &q : quat_list) {
+  for (const auto &q : quat_list)
+  {
     Eigen::Vector4d q_vec(q.w(), q.x(), q.y(), q.z());
     M += q_vec * q_vec.transpose();
   }
@@ -92,18 +101,24 @@ Eigen::Quaterniond ImageProcessor::quaternion_avg(
 }
 
 void ImageProcessor::image_callback(
-    const sensor_msgs::msg::Image::SharedPtr msg) {
+    const sensor_msgs::msg::Image::SharedPtr msg)
+{
+  // RCLCPP_INFO(this->get_logger(), "Received image");
   cv_bridge::CvImagePtr cv_ptr;
-  try {
+  try
+  {
     cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
-  } catch (cv_bridge::Exception &e) {
+  }
+  catch (cv_bridge::Exception &e)
+  {
     RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
     return;
   }
   cv::Vec3d tvec_camera, rvec_camera;
   bool success =
       camera_pose_estimation(cv_ptr->image, tvec_camera, rvec_camera);
-  if (success) {
+  if (success)
+  {
     tvec_cam_list_[idx_] = tvec_camera;
     rvec_cam_list_[idx_] = rvec_camera;
     idx_++;
@@ -112,10 +127,12 @@ void ImageProcessor::image_callback(
   cv_ptr.reset();
 
   // Check if we've reached N samples
-  if (idx_ == static_cast<int>(N_)) {
+  if (idx_ == static_cast<int>(N_))
+  {
     idx_ = 0;
     Eigen::Vector3d mean_tvec = Eigen::Vector3d::Zero();
-    for (const auto &tvec : tvec_cam_list_) {
+    for (const auto &tvec : tvec_cam_list_)
+    {
       mean_tvec += Eigen::Vector3d(tvec[0], tvec[1], tvec[2]);
     }
     mean_tvec /= tvec_cam_list_.size();
@@ -123,7 +140,8 @@ void ImageProcessor::image_callback(
     std::vector<Eigen::Quaterniond> quat_list(tvec_cam_list_.size());
     cv::Mat R_cv;
     Eigen::Matrix3d R;
-    for (size_t i = 0; i < tvec_cam_list_.size(); ++i) {
+    for (size_t i = 0; i < tvec_cam_list_.size(); ++i)
+    {
       cv::Rodrigues(rvec_cam_list_[i], R_cv);
       cv::cv2eigen(R_cv, R);
       quat_list[i] = Eigen::Quaterniond(R).normalized();
@@ -131,8 +149,11 @@ void ImageProcessor::image_callback(
     mean_quat_ = quaternion_avg(quat_list);
     // Lock mean_computed with mutex (if multithreading is involved)
     mean_computed_ = true;
-  } else {
-    if (idx_ >= static_cast<int>(N_)) {
+  }
+  else
+  {
+    if (idx_ >= static_cast<int>(N_))
+    {
       idx_ = 0;
     }
   }

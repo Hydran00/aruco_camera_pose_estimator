@@ -2,7 +2,7 @@ pose_service:
   ros__parameters:
     input_topic_name: "/camera/camera/color/image_raw"
     output_service_name: "/calibration/get_camera_pose"
-    aruco_marker_id: 9
+    frame_id: "base_link"
     n_observation: 10 # number of measurements for computing the average
     timeout_ms: 2000
     show_img: false
