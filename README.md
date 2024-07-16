@@ -34,6 +34,10 @@ In another sourced terminal call the service
 ros2 service call /calibration/get_camera_pose calibration_srv/srv/Calibration "marker_id: <your-marker-id>"
 ```
 You will get a PoseStamped message as response corresponding to the camera pose with respect to the world frame.
+
+<img src="aruco_camera_pose_estimator_cpp/illustration.jpg" width="500"/>
+
+
 ### Maths behind this implementation
 The OpenCV Aruco Library let us compute $M_{a}^{c} \in \mathcal{R}^{4x4}$ that express the rototranslation of the Aruco with respect to the camera frame. 
 
