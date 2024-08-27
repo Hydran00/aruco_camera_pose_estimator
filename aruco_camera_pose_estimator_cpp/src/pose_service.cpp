@@ -153,10 +153,9 @@ void PoseService::get_camera_pose_service_callback(
   }
   // unsubscribe from the camera topic
   image_processor_node_->sub_.reset();
+
   // node_executor_.remove_node(image_processor_node_);
-  RCLCPP_INFO(this->get_logger(), "Mean pose computed correctly after %d "
-                                  "observations",
-              image_processor_node_->idx_);
+  RCLCPP_INFO(this->get_logger(), "Mean pose computed correctly");
   get_camera_pose(mean_tvec_, mean_quat_, response->camera_pose);
   response->camera_pose.header.frame_id = this->get_parameter("frame_id").as_string();
   response->camera_pose.header.stamp = this->get_clock()->now();
