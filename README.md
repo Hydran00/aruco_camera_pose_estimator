@@ -45,7 +45,7 @@ Since we want $M_{c}^{w}$ (the camera with respect to the world frame), we can c
 
 $M_{c}^{w} = M_{a}^{w}  M_{c}^{a}$  
 
-where $M_{c}^{a} \in \mathcal{R}^{4x4}$ is the transpose of $M_{a}^{c}$ and $M_{a}^{w} \in \mathcal{R}^{4x4}$ is the rototranslation of the aruco marker with respect to the world frame.
+where $M_{c}^{a} \in \mathcal{R}^{4x4}$ is the inverse of $M_{a}^{c}$ and $M_{a}^{w} \in \mathcal{R}^{4x4}$ is the rototranslation of the aruco marker with respect to the world frame.
 
 **Note that if you just need the camera pose with respect to the aruco marker you can neglect $M_{a}^{w}$, i.e. setting it to equal to the identity matrix.**
 
