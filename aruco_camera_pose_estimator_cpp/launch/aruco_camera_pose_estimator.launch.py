@@ -19,8 +19,8 @@ def generate_launch_description():
         package="aruco_camera_pose_estimator_cpp",
         executable="aruco_camera_pose_estimator_cpp",
         # get parameters from yaml file
-        parameters=[ParameterFile(get_package_share_directory('aruco_camera_pose_estimator') + "/config/config.yaml"),
-                    ParameterFile(get_package_share_directory('aruco_camera_pose_estimator') + "/config/calibration_params.yaml")
+        parameters=[ParameterFile(get_package_share_directory('aruco_camera_pose_estimator_cpp') + "/config/config.yaml"),
+                    ParameterFile(get_package_share_directory('aruco_camera_pose_estimator_cpp') + "/config/calibration_params.yaml")
                     ]
     )
     ####################################################################

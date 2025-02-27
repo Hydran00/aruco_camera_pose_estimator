@@ -103,6 +103,8 @@ Eigen::Quaterniond ImageProcessor::quaternion_avg(
 void ImageProcessor::image_callback(
     const sensor_msgs::msg::Image::SharedPtr msg)
 {
+    RCLCPP_INFO_ONCE(this->get_logger(), "ImageProcessor: Topic connected");
+  
   // RCLCPP_INFO(this->get_logger(), "Received image");
   cv_bridge::CvImagePtr cv_ptr;
   try
