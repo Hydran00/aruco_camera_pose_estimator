@@ -19,6 +19,8 @@ find_package(Eigen3 REQUIRED )
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(calibration_srv REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 add_executable(aruco_camera_pose_estimator_cpp
   src/pose_service.cpp
@@ -30,6 +32,8 @@ ament_target_dependencies(aruco_camera_pose_estimator_cpp
     geometry_msgs
     cv_bridge
     calibration_srv
+    tf2
+    tf2_ros
 )
 include_directories(
   ${OpenCV_INCLUDE_DIRS}

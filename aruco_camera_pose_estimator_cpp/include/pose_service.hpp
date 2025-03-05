@@ -8,13 +8,15 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include "calibration_srv/srv/calibration.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "image_processor.hpp"
+#include "tf2_ros/transform_broadcaster.h"
 
 class PoseService : public rclcpp::Node {
- public:
+public:
   PoseService();
 
- private:
+private:
   rclcpp::Service<calibration_srv::srv::Calibration>::SharedPtr srv_;
   Eigen::Vector3d mean_tvec_;
   Eigen::Quaterniond mean_quat_;
@@ -24,6 +26,12 @@ class PoseService : public rclcpp::Node {
   u_int32_t timeout_;
   std::vector<double> aruco_XYZ_offset_from_baseframe_;
   std::vector<double> aruco_rot_offset_from_baseframe_;
+  // timer to publish the transform
+  rclcpp::TimerBase::SharedPtr timer_;
+
+  // tf broadcaster
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  geometry_msgs::msg::TransformStamped transformStamped_;
 
   void get_camera_pose(const Eigen::Vector3d &tvec,
                        const Eigen::Quaterniond &quat,
@@ -34,4 +42,4 @@ class PoseService : public rclcpp::Node {
       std::shared_ptr<calibration_srv::srv::Calibration::Response> response);
 };
 
-#endif  // POSE_SERVICE_HPP
+#endif // POSE_SERVICE_HPP

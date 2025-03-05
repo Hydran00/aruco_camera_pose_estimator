@@ -3,10 +3,8 @@
 using std::chrono::milliseconds;
 
 PoseService::PoseService()
-    : Node("pose_service"),
-      mean_tvec_(Eigen::Vector3d::Zero()),
-      mean_quat_(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0))
-{
+    : Node(), mean_tvec_(Eigen::Vector3d::Zero()),
+      mean_quat_(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0)) {
   this->declare_parameter("input_topic_name", "/camera/camera/color/image_raw");
   this->declare_parameter("output_service_name",
                           "/calibration/get_camera_pose");
@@ -52,9 +50,8 @@ PoseService::PoseService()
 
   image_processor_node_ = std::make_shared<ImageProcessor>(
       this->get_parameter("input_topic_name").as_string(),
-      this->get_parameter("n_observation").as_int(),
-      mean_tvec_, mean_quat_, mean_computed_,
-      this->get_parameter("show_img").as_bool(),
+      this->get_parameter("n_observation").as_int(), mean_tvec_, mean_quat_,
+      mean_computed_, this->get_parameter("show_img").as_bool(),
       this->get_parameter("aruco_size").as_double(),
       this->get_parameter("cx").as_double(),
       this->get_parameter("cy").as_double(),
@@ -98,20 +95,20 @@ PoseService::PoseService()
       this->get_logger(), "aruco_rot_offset_from_baseframe: %f %f %f %f",
       aruco_rot_offset_from_baseframe_[0], aruco_rot_offset_from_baseframe_[1],
       aruco_rot_offset_from_baseframe_[2], aruco_rot_offset_from_baseframe_[3]);
+
+  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 }
 
 void PoseService::get_camera_pose_service_callback(
     const std::shared_ptr<calibration_srv::srv::Calibration::Request> request,
-    std::shared_ptr<calibration_srv::srv::Calibration::Response> response)
-{
+    std::shared_ptr<calibration_srv::srv::Calibration::Response> response) {
   (void)request;
   RCLCPP_INFO(this->get_logger(), "Request received");
 
   mean_computed_ = false;
 
   // Unsubscribe if already subscribed
-  if (image_processor_node_->sub_)
-  {
+  if (image_processor_node_->sub_) {
     image_processor_node_->sub_.reset();
   }
 
@@ -127,26 +124,22 @@ void PoseService::get_camera_pose_service_callback(
 
   auto start_time = this->get_clock()->now();
   while (rclcpp::ok() && !mean_computed_ &&
-         (this->get_clock()->now() - start_time) < milliseconds(timeout_))
-  {
+         (this->get_clock()->now() - start_time) < milliseconds(timeout_)) {
     node_executor_.spin_some();
   }
 
-  if (!mean_computed_)
-  {
-    if (image_processor_node_->idx_ == 0)
-    {
+  if (!mean_computed_) {
+    if (image_processor_node_->idx_ == 0) {
       RCLCPP_ERROR(this->get_logger(),
                    "No Aruco found, possible reasons: topic name wrong, "
                    "Aruco id wrong or Aruco not in the field of view!");
-    }
-    else
-    {
-      RCLCPP_ERROR(this->get_logger(),
-                   "Timeout reached before collecting %ld observations: just %d "
-                   "measurements collected, try improving the timeout time!",
-                   this->get_parameter("n_observation").as_int(),
-                   image_processor_node_->idx_);
+    } else {
+      RCLCPP_ERROR(
+          this->get_logger(),
+          "Timeout reached before collecting %ld observations: just %d "
+          "measurements collected, try improving the timeout time!",
+          this->get_parameter("n_observation").as_int(),
+          image_processor_node_->idx_);
     }
     response->camera_pose.header.frame_id = "error";
     return;
@@ -157,8 +150,24 @@ void PoseService::get_camera_pose_service_callback(
   // node_executor_.remove_node(image_processor_node_);
   RCLCPP_INFO(this->get_logger(), "Mean pose computed correctly");
   get_camera_pose(mean_tvec_, mean_quat_, response->camera_pose);
-  response->camera_pose.header.frame_id = this->get_parameter("frame_id").as_string();
+  response->camera_pose.header.frame_id =
+      this->get_parameter("frame_id").as_string();
   response->camera_pose.header.stamp = this->get_clock()->now();
+
+  geometry_msgs::msg::TransformStamped t;
+  t.header.stamp = response->camera_pose.header.stamp;
+  t.header.frame_id = this->get_parameter("frame_id").as_string();
+  // add random number to avoid tf buffer error
+  t.child_frame_id = "aruco" + std::to_string(rand());
+  t.transform.translation.x = response->camera_pose.pose.position.x;
+  t.transform.translation.y = response->camera_pose.pose.position.y;
+  t.transform.translation.z = response->camera_pose.pose.position.z;
+  t.transform.rotation = response->camera_pose.pose.orientation;
+
+  // start thread to broadcast the transform
+  timer_ = this->create_wall_timer(std::chrono::milliseconds(100), [this, t]() {
+    tf_broadcaster_->sendTransform(t);
+  });
 
   mean_tvec_ = Eigen::Vector3d::Zero();
   mean_quat_ = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
@@ -166,8 +175,7 @@ void PoseService::get_camera_pose_service_callback(
 
 void PoseService::get_camera_pose(const Eigen::Vector3d &tvec,
                                   const Eigen::Quaterniond &quat,
-                                  geometry_msgs::msg::PoseStamped &pose_msg)
-{
+                                  geometry_msgs::msg::PoseStamped &pose_msg) {
   // rTc = rTa * cTa -> rTc = rTa * cTa where r is robot frame, a is aruco
   // frame, c is camera frame
   Eigen::Matrix3d R = quat.toRotationMatrix();
@@ -202,14 +210,14 @@ void PoseService::get_camera_pose(const Eigen::Vector3d &tvec,
   pose_msg.pose.position.z = T_robot_to_camera(2, 3);
 
   Eigen::Quaterniond q_rTc(T_robot_to_camera.block<3, 3>(0, 0));
+  q_rTc.normalize();
   pose_msg.pose.orientation.w = q_rTc.w();
   pose_msg.pose.orientation.x = q_rTc.x();
   pose_msg.pose.orientation.y = q_rTc.y();
   pose_msg.pose.orientation.z = q_rTc.z();
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PoseService>();
   rclcpp::executors::MultiThreadedExecutor executor;
